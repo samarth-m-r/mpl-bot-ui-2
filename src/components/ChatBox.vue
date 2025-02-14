@@ -41,6 +41,7 @@
 import { ref, watch, nextTick } from "vue";
 import { CHATS } from "@/stores/chat";
 import { useSpeechRecognition } from "@vueuse/core";
+import { getMplBotResponse } from "@/api/server";
 
 const message = ref("");
 const textarea = ref<HTMLTextAreaElement | null>(null);
@@ -90,6 +91,9 @@ function sendChats() {
   }
 
   CHATS.value.push({ role: "user", content: message.value });
+
+  const queryMessage = message.value;
+
   message.value = "";
   
   // Reset textarea height
@@ -102,13 +106,21 @@ function sendChats() {
     chatContainer?.scrollTo(0, chatContainer.scrollHeight);
   });
 
-  setTimeout(() => {
-    CHATS.value.push({ role: "bot", content: "This is a dummy response." });
-    nextTick(() => {
-      const chatContainer = document.querySelector(".overflow-auto");
-      chatContainer?.scrollTo(0, chatContainer.scrollHeight);
-    });
-  }, 1000);
+  // setTimeout(() => {
+  //   CHATS.value.push({ role: "bot", content: "This is a dummy response." });
+  //   nextTick(() => {
+  //     const chatContainer = document.querySelector(".overflow-auto");
+  //     chatContainer?.scrollTo(0, chatContainer.scrollHeight);
+  //   });
+  // }, 1000);
+
+  getMplBotResponse(queryMessage).then((res) => {
+    CHATS.value.push({
+      role: "bot",
+      content: res.answer
+    })
+  })
+
 }
 </script>
 

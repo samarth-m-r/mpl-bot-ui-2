@@ -13,7 +13,8 @@
   "dependencies": {
     "@vueuse/core": "^10.7.1",
     "openai": "^4.24.1",
-    "vue": "^3.3.11"
+    "vue": "^3.3.11",
+    "axios": "1.7.9"
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.2",
