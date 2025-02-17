@@ -12,25 +12,23 @@ export interface IMPLBotApiRequest {
 }
 
 interface IMPLBotApiResponse {
-
-    event: string,
-    task_id: string,
-    id: string,
-    message_id: string,
-    conversation_id: string,
-    mode: string,
-    answer: string,
-    metadata: any,
-    created_at: number
-
+    event: string;
+    task_id: string;
+    id: string;
+    message_id: string;
+    conversation_id: string;
+    mode: string;
+    answer: string;
+    metadata: any;
+    created_at: number;
 }
 
 const apiClient = axios.create({
     baseURL: AppConfig.MPL_BOT_API_REQUEST_URL,
     headers: {
-        'Content-type': 'application/json',
-    }
-})
+        "Content-Type": "application/json",
+    },
+});
 
 export const getMplBotResponse = async (
     query: string, 
@@ -38,18 +36,21 @@ export const getMplBotResponse = async (
     conversation_id?: string, 
     parent_message_id?: string
 ): Promise<IMPLBotApiResponse> => {
-
     const requestData: IMPLBotApiRequest = {
         query: query,
         user: "abc-123", // get the user from Azure Ad and pass it here
         response_mode: response_mode,
         inputs: {},
-        conversation_id: conversation_id,
-        parent_message_id: parent_message_id,
-        files: []
+        conversation_id,
+        parent_message_id,
+        files: [],
+    };
+
+    try {
+        const res = await apiClient.post<IMPLBotApiResponse>("/ask_bot", requestData);
+        return res.data;
+    } catch (error) {
+        console.error("API Error:", error);
+        throw new Error("Failed to fetch bot response.");
     }
-
-    const res = await apiClient.post<IMPLBotApiResponse>("/ask_bot", requestData);
-    return res.data
-
-}
+};
