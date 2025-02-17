@@ -6,7 +6,7 @@
       rows="1"
       :placeholder="isListening ? 'Listening...' : 'Type your message here...'"
       class="w-full rounded-lg border border-gray-300 px-4 py-2 pr-24 focus:border-[#2196f3] focus:outline-none resize-none no-scrollbar"
-      @keydown.enter.exact.prevent="sendChats"
+      @keydown.enter.exact.prevent="fetchResponse"
       @keydown.shift.enter.prevent="message += '\n'"
       @input="autoGrow"
     ></textarea>
@@ -26,7 +26,7 @@
         </svg>
       </button>
       <button
-        @click="sendChats"
+        @click="fetchResponse"
         class="p-2 hover:bg-gray-100 rounded-full transition-colors text-[#2196f3]"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 rotate-90" viewBox="0 0 20 20" fill="currentColor">
@@ -38,10 +38,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from "vue";
+import { ref, watch, nextTick, computed } from "vue";
 import { CHATS } from "@/stores/chat";
 import { useSpeechRecognition } from "@vueuse/core";
-import { getMplBotResponse } from "@/api/server";
+import { getMplBotResponse, type IMPLBotApiRequest } from "@/api/server";
+import { AppConfig } from "@/AppConfig";
 
 const message = ref("");
 const textarea = ref<HTMLTextAreaElement | null>(null);
@@ -83,14 +84,32 @@ function toggleVoiceInput() {
   }
 }
 
-function sendChats() {
+const isTyping = ref(false);   // Typing indicator
+
+const isMac = computed(() => /Mac/.test(navigator.userAgent)).value;
+const isWindows = computed(() => /Win/.test(navigator.userAgent)).value;
+
+function pushUserMessage(userMessage: string) {
+  CHATS.value.push({ role: "user", content: userMessage });
+}
+
+function fetchResponse() {
+  if (isMac) {
+    fetchResponseBlocking();
+  }
+  else {
+    fetchResponseStreaming();
+  }
+}
+
+function fetchResponseBlocking() {
   if (!message.value.trim()) return;
 
   if (isListening.value) {
     stop();
   }
 
-  CHATS.value.push({ role: "user", content: message.value });
+  pushUserMessage(message.value)
 
   const queryMessage = message.value;
 
@@ -114,7 +133,7 @@ function sendChats() {
   //   });
   // }, 1000);
 
-  getMplBotResponse(queryMessage).then((res) => {
+  getMplBotResponse(queryMessage, "blocking").then((res) => {
     CHATS.value.push({
       role: "bot",
       content: res.answer
@@ -122,6 +141,74 @@ function sendChats() {
   })
 
 }
+
+  // Function to send message and receive SSE response
+
+const fetchResponseStreaming = async () => {
+  if (!message.value.trim()) return;
+  isTyping.value = true;
+
+  try {
+
+    pushUserMessage(message.value)
+
+    const requestData: IMPLBotApiRequest = {
+      query: message.value,
+      user: "abc-123", // get the user from Azure Ad and pass it here
+      response_mode: "streaming",
+      inputs: {},
+      // conversation_id: conversation_id,
+      // parent_message_id: parent_message_id,
+      // files: []
+    }
+    
+    message.value = "";
+
+    const response = await fetch(AppConfig.MPL_BOT_API_REQUEST_URL + "/ask_bot", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestData),
+    });
+
+    if (!response.ok || !response.body) throw new Error("Failed to send message");
+
+    const lastIdx = CHATS.value.length;
+    CHATS.value.push({ role: "bot", content: "" });
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+
+    const readStream = async () => {
+      const { done, value } = await reader.read();
+      if (done) {
+        isTyping.value = false;
+        return;
+      }
+
+      const chunk = decoder.decode(value, { stream: true });
+      chunk.split("\n\n").forEach((line) => {
+        if (line.startsWith("data: ")) {
+          try {
+            const parsedData = JSON.parse(line.replace("data: ", "").trim());
+            if(!!parsedData.event && parsedData.event === "message")
+              CHATS.value[lastIdx].content += parsedData.answer;
+          } catch (error) {
+            console.error("Error parsing SSE data:", error);
+          }
+        }
+      });
+
+      // Recursively read the next chunk
+      readStream();
+    };
+
+    readStream();
+  } catch (error) {
+    console.error("Error:", error);
+  }
+
+};
+
 </script>
 
 <style>

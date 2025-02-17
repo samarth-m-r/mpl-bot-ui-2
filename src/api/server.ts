@@ -1,7 +1,7 @@
 import { AppConfig } from "@/AppConfig";
 import axios from "axios";
 
-interface IMPLBotApiRequest {
+export interface IMPLBotApiRequest {
     query: string
     user: string
     response_mode: "streaming" | "blocking"
@@ -34,6 +34,7 @@ const apiClient = axios.create({
 
 export const getMplBotResponse = async (
     query: string, 
+    response_mode: "streaming" | "blocking",
     conversation_id?: string, 
     parent_message_id?: string
 ): Promise<IMPLBotApiResponse> => {
@@ -41,7 +42,7 @@ export const getMplBotResponse = async (
     const requestData: IMPLBotApiRequest = {
         query: query,
         user: "abc-123", // get the user from Azure Ad and pass it here
-        response_mode: "blocking", // this should be "streaming" for real-time chat
+        response_mode: response_mode,
         inputs: {},
         conversation_id: conversation_id,
         parent_message_id: parent_message_id,
