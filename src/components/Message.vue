@@ -13,7 +13,7 @@
       </div>
     </template>
     <template v-else>
-      <div class="bg-[rgb(53,146,195)] p-2 rounded-lg w-fit max-w-md text-white">
+      <div class="bg-gray-300 p-2 rounded-lg w-fit max-w-md">
         <div class="font-bold">You</div>
         <div>{{ content }}</div>
       </div>

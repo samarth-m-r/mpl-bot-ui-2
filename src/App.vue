@@ -25,7 +25,7 @@ const toggleSidebar = () => {
     <!-- Main Content -->
     <div :class="{'ml-72': isSidebarOpen}" class="flex-1 flex flex-col bg-gray-50 transition-all duration-300">
       <!-- Header -->
-      <header class="bg-[rgb(53,146,195)] px-4 py-2 flex justify-between items-center">
+      <header class="bg-gray-800 px-4 py-2 flex justify-between items-center">
         <div class="flex items-center gap-4">
           <button 
             @click="toggleSidebar"
@@ -41,7 +41,7 @@ const toggleSidebar = () => {
               alt="MPL Bot Logo"
               class="w-8 h-8"
             />
-            <span class="text-white font-semibold text-lg">MPL Bot</span>
+            <span class="text-white font-semibold text-lg">Maersk Project Logistics - AI Assistant</span>
           </div>
         </div>
         <div class="text-white">{{ userName }}</div>
