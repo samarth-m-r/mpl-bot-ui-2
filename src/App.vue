@@ -1,7 +1,7 @@
-
 <script setup lang="ts">
 import ChatBox from "./components/ChatBox.vue";
 import ChatsContainer from "./components/ChatsContainer.vue";
+import Header from "./components/Header.vue";
 import { ref } from 'vue';
 
 const userName = "Samarth M R";
@@ -12,19 +12,7 @@ const userName = "Samarth M R";
     <!-- Main Content -->
     <div class="flex-1 flex flex-col bg-gray-50 transition-all duration-300">
       <!-- Header -->
-      <header class="bg-gray-800 px-4 py-2 flex justify-between items-center">
-        <div class="flex items-center gap-4">
-          <a href="https://www.maersk.com/" target="_blank" class="flex items-center gap-2">
-            <img
-              src="./assets/Maersk_Oil_logo.svg_-350x316.png"
-              alt="MPL Bot Logo"
-              class="w-8 h-8"
-            />
-            <span class="text-white font-semibold text-lg">Maersk Project Logistics - AI Assistant</span>
-          </a>
-        </div>
-        <div class="text-white">{{ userName }}</div>
-      </header>
+      <Header />
 
       <!-- Chat Area -->
       <div class="flex-1 relative">

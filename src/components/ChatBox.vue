@@ -173,7 +173,7 @@ const fetchResponseStreaming = async () => {
     if (!response.ok || !response.body) throw new Error("Failed to send message");
 
     const lastIdx = CHATS.value.length;
-    CHATS.value.push({ role: "bot", content: "" });
+    CHATS.value.push({ role: "bot", content: "Loading..." });
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder("utf-8");
@@ -190,8 +190,13 @@ const fetchResponseStreaming = async () => {
         if (line.startsWith("data: ")) {
           try {
             const parsedData = JSON.parse(line.replace("data: ", "").trim());
-            if(!!parsedData.event && parsedData.event === "message")
-              CHATS.value[lastIdx].content += parsedData.answer;
+            if(!!parsedData.event && parsedData.event === "message") {
+              if (CHATS.value[lastIdx].content === "Loading...") {
+                CHATS.value[lastIdx].content = parsedData.answer;
+              } else {
+                CHATS.value[lastIdx].content += parsedData.answer;
+              }
+            }
           } catch (error) {
             console.error("Error parsing SSE data:", error);
           }
@@ -208,15 +213,28 @@ const fetchResponseStreaming = async () => {
   }
 
 };
-
 </script>
 
-<style>
-.no-scrollbar {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+<style scoped>
+.message {
+  margin-bottom: 10px;
 }
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+.bot-message {
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-radius: 5px;
+}
+.user-message {
+  background-color: #d1e7dd;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: right;
+}
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+  color: #888;
 }
 </style>
