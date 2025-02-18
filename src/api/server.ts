@@ -43,7 +43,7 @@ export const getMplBotResponse = async (
         inputs: {},
         conversation_id,
         parent_message_id,
-        files: [],
+        // files: [],
     };
 
     try {

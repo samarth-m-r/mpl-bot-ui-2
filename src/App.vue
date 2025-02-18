@@ -3,8 +3,6 @@ import ChatBox from "./components/ChatBox.vue";
 import ChatsContainer from "./components/ChatsContainer.vue";
 import Header from "./components/Header.vue";
 import { ref } from 'vue';
-
-const userName = "Samarth M R";
 </script>
 
 <template>

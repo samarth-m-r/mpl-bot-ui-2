@@ -46,6 +46,8 @@ import { AppConfig } from "@/AppConfig";
 
 const message = ref("");
 const textarea = ref<HTMLTextAreaElement | null>(null);
+const conversationId = ref<string | undefined>(undefined);
+const parentMessageId = ref<string | undefined>(undefined);
 
 const {
   isListening,
@@ -90,7 +92,9 @@ const isMac = computed(() => /Mac/.test(navigator.userAgent)).value;
 const isWindows = computed(() => /Win/.test(navigator.userAgent)).value;
 
 function pushUserMessage(userMessage: string) {
+  // const messageId = Date.now().toString(); // Generate a unique ID for the message
   CHATS.value.push({ role: "user", content: userMessage });
+  // parentMessageId.value = messageId; // Update parentMessageId with the ID of the last user message
 }
 
 function fetchResponse() {
@@ -125,24 +129,16 @@ function fetchResponseBlocking() {
     chatContainer?.scrollTo(0, chatContainer.scrollHeight);
   });
 
-  // setTimeout(() => {
-  //   CHATS.value.push({ role: "bot", content: "This is a dummy response." });
-  //   nextTick(() => {
-  //     const chatContainer = document.querySelector(".overflow-auto");
-  //     chatContainer?.scrollTo(0, chatContainer.scrollHeight);
-  //   });
-  // }, 1000);
-
-  getMplBotResponse(queryMessage, "blocking").then((res) => {
+  getMplBotResponse(queryMessage, "blocking", conversationId.value, parentMessageId.value).then((res) => {
     CHATS.value.push({
       role: "bot",
       content: res.answer
-    })
-  })
+    });
+    conversationId.value = res.conversation_id; 
+    parentMessageId.value = res.message_id; 
+  });
 
 }
-
-  // Function to send message and receive SSE response
 
 const fetchResponseStreaming = async () => {
   if (!message.value.trim()) return;
@@ -157,9 +153,8 @@ const fetchResponseStreaming = async () => {
       user: "abc-123", // get the user from Azure Ad and pass it here
       response_mode: "streaming",
       inputs: {},
-      // conversation_id: conversation_id,
-      // parent_message_id: parent_message_id,
-      // files: []
+      conversation_id: conversationId.value,
+      parent_message_id: parentMessageId.value,
     }
     
     message.value = "";
@@ -196,6 +191,12 @@ const fetchResponseStreaming = async () => {
               } else {
                 CHATS.value[lastIdx].content += parsedData.answer;
               }
+
+              if(!!parsedData.conversation_id)
+                conversationId.value = parsedData.conversation_id; 
+
+              if(!!parsedData.message_id)
+                parentMessageId.value = parsedData.message_id; 
             }
           } catch (error) {
             console.error("Error parsing SSE data:", error);

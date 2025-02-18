@@ -32,6 +32,17 @@ const props = defineProps<{
 
 const isUser = computed(() => props.role === "user");
 
+
+const loading = ref(false); // New loading state
+
+function sendMessage() {
+    loading.value = true; // Set loading to true when sending
+    // Simulate an API call with a timeout
+    setTimeout(() => {
+        loading.value = false; // Reset loading state after response
+    }, 2000); // Simulate a 2-second delay
+}
+
 function parseMarkdown(text: string) {
   return text
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
