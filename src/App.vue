@@ -2,27 +2,37 @@
 import ChatBox from "./components/ChatBox.vue";
 import ChatsContainer from "./components/ChatsContainer.vue";
 import Header from "./components/Header.vue";
+import Sidebar from "./components/Sidebar.vue";
 import { ref } from 'vue';
+
+const isSidebarExpanded = ref(false);
+
+function toggleSidebar() {
+  isSidebarExpanded.value = !isSidebarExpanded.value;
+}
 </script>
 
 <template>
-  <div class="h-screen w-full flex">
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col bg-gray-50 transition-all duration-300">
-      <!-- Header -->
-      <Header />
-
-      <!-- Chat Area -->
-      <div class="flex-1 relative">
-        <div class="absolute inset-0 flex flex-col">
-          <div class="flex-1 overflow-y-auto px-4 custom-scrollbar">
-            <div class="max-w-3xl mx-auto py-4">
-              <ChatsContainer />
+  <div class="h-screen w-full flex flex-col">
+    <!-- Header -->
+    <Header @toggle-sidebar="toggleSidebar" />
+    <div class="flex flex-1">
+      <!-- Sidebar -->
+      <Sidebar :is-expanded="isSidebarExpanded" />
+      <!-- Main Content -->
+      <div class="flex-1 flex flex-col bg-gray-50 transition-all duration-300">
+        <!-- Chat Area -->
+        <div class="flex-1 relative">
+          <div class="absolute inset-0 flex flex-col">
+            <div class="flex-1 overflow-y-auto px-4 custom-scrollbar">
+              <div class="max-w-3xl mx-auto py-4">
+                <ChatsContainer />
+              </div>
             </div>
-          </div>
-          <div class="w-full bg-gray-50 border-t p-4">
-            <div class="max-w-3xl mx-auto">
-              <ChatBox />
+            <div class="w-full bg-gray-50 border-t p-4">
+              <div class="max-w-3xl mx-auto">
+                <ChatBox />
+              </div>
             </div>
           </div>
         </div>

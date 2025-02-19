@@ -1,5 +1,6 @@
 <template>
   <div class="relative">
+    <!-- textbox.where only texts are allowed -->
     <textarea
       v-model="message"
       ref="textarea"
@@ -10,6 +11,7 @@
       @keydown.shift.enter.prevent="message += '\n'"
       @input="autoGrow"
     ></textarea>
+    <!-- voice icon -->
     <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
       <button
         @click="toggleVoiceInput"
@@ -25,6 +27,8 @@
           />
         </svg>
       </button>
+
+      <!-- send icon -->
       <button
         @click="fetchResponse"
         class="p-2 hover:bg-gray-100 rounded-full transition-colors text-[#2196f3]"
@@ -92,31 +96,18 @@ const isMac = computed(() => /Mac/.test(navigator.userAgent)).value;
 const isWindows = computed(() => /Win/.test(navigator.userAgent)).value;
 
 function pushUserMessage(userMessage: string) {
-  // const messageId = Date.now().toString(); // Generate a unique ID for the message
   CHATS.value.push({ role: "user", content: userMessage });
-  // parentMessageId.value = messageId; // Update parentMessageId with the ID of the last user message
 }
 
 function fetchResponse() {
-  if (isMac) {
-    fetchResponseBlocking();
-  }
-  else {
-    fetchResponseStreaming();
-  }
-}
-
-function fetchResponseBlocking() {
   if (!message.value.trim()) return;
 
   if (isListening.value) {
     stop();
   }
 
-  pushUserMessage(message.value)
-
+  pushUserMessage(message.value);
   const queryMessage = message.value;
-
   message.value = "";
   
   // Reset textarea height
@@ -129,36 +120,42 @@ function fetchResponseBlocking() {
     chatContainer?.scrollTo(0, chatContainer.scrollHeight);
   });
 
+  if (isMac) {
+    fetchResponseBlocking(queryMessage);
+  } else {
+    fetchResponseStreaming(queryMessage);
+  }
+}
+
+function fetchResponseBlocking(queryMessage: string) {
+  CHATS.value.push({ role: "bot", content: "Loading..." });
+
   getMplBotResponse(queryMessage, "blocking", conversationId.value, parentMessageId.value).then((res) => {
-    CHATS.value.push({
-      role: "bot",
-      content: res.answer
-    });
+    const loadingMessageIndex = CHATS.value.findIndex(chat => chat.content === "Loading...");
+    if (loadingMessageIndex !== -1) {
+      CHATS.value[loadingMessageIndex] = {
+        role: "bot",
+        content: res.answer
+      };
+    }
     conversationId.value = res.conversation_id; 
     parentMessageId.value = res.message_id; 
   });
-
 }
 
-const fetchResponseStreaming = async () => {
-  if (!message.value.trim()) return;
-  isTyping.value = true;
+const fetchResponseStreaming = async (queryMessage: string) => {
+  CHATS.value.push({ role: "bot", content: "Loading..." });
 
   try {
-
-    pushUserMessage(message.value)
-
     const requestData: IMPLBotApiRequest = {
-      query: message.value,
+      query: queryMessage,
       user: "abc-123", // get the user from Azure Ad and pass it here
       response_mode: "streaming",
       inputs: {},
       conversation_id: conversationId.value,
       parent_message_id: parentMessageId.value,
-    }
+    };
     
-    message.value = "";
-
     const response = await fetch(AppConfig.MPL_BOT_API_REQUEST_URL + "/ask_bot", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -167,9 +164,7 @@ const fetchResponseStreaming = async () => {
 
     if (!response.ok || !response.body) throw new Error("Failed to send message");
 
-    const lastIdx = CHATS.value.length;
-    CHATS.value.push({ role: "bot", content: "Loading..." });
-
+    const lastIdx = CHATS.value.length - 1;
     const reader = response.body.getReader();
     const decoder = new TextDecoder("utf-8");
 
@@ -212,7 +207,6 @@ const fetchResponseStreaming = async () => {
   } catch (error) {
     console.error("Error:", error);
   }
-
 };
 </script>
 
