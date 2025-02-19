@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import ChatBox from "./components/ChatBox.vue";
-import ChatsContainer from "./components/ChatsContainer.vue";
-import Header from "./components/Header.vue";
-import Sidebar from "./components/Sidebar.vue";
+import ChatBox from "./components/cx-agent-mva/ChatBox.vue";
+import ChatsContainer from "./components/cx-agent-mva/ChatsContainer.vue";
+import Header from "./components/header/Header.vue";
+import Sidebar from "./components/sidebar/Sidebar.vue";
 import { ref } from 'vue';
 
 const isSidebarExpanded = ref(false);

@@ -8,7 +8,7 @@
       </button>
       <a href="https://www.maersk.com/" target="_blank" class="flex items-center gap-2">
         <img
-          src="../assets/Maersk_Oil_logo.svg_-350x316.png"
+          src="/assets/Maersk_Oil_logo.svg_-350x316.png"
           alt="MPL Bot Logo"
           class="w-8 h-8"
         />
