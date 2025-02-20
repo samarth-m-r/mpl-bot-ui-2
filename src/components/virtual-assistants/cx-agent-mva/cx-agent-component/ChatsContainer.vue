@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { watch } from "vue";
-import Message from "@/components/cx-agent-mva/Message.vue";
+import Message from "../cx-agent-component/Message.vue";
 import { CHATS } from "@/stores/chat";
 
 
