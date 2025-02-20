@@ -14,7 +14,7 @@
     <template v-else>
       <div class="bg-[#2196f3] bg-opacity-10 p-3 rounded-lg w-fit max-w-[90%] shadow-sm">
         <div class="font-bold text-gray-800 mb-1">You</div>
-        <div class="message-content whitespace-pre-wrap text-gray-700 leading-relaxed" v-html="parseMarkdown(content)"></div>
+        <div class="message-content whitespace-pre-wrap text-gray-700 leading-relaxed " v-html="parseMarkdown(content)"></div>
       </div>
       <span class="text-[rgb(53,146,195)]">👤</span>
     </template>

@@ -8,7 +8,7 @@
       :placeholder="isListening ? 'Listening...' : 'Type your message here...'"
       class="w-full rounded-lg border border-gray-300 px-4 py-2 pr-24 focus:border-[#2196f3] focus:outline-none resize-none no-scrollbar"
       @keydown.enter.exact.prevent="fetchResponse"
-      @keydown.shift.enter.prevent="message += '\n'"
+      @keydown.shift.enter.prevent="handleNewLine"
       @input="autoGrow"
     ></textarea>
     <!-- voice icon -->
@@ -208,6 +208,11 @@ const fetchResponseStreaming = async (queryMessage: string) => {
     console.error("Error:", error);
   }
 };
+
+function handleNewLine() {
+  message.value += '\n';
+  nextTick(() => autoGrow());
+}
 </script>
 
 <style scoped>
@@ -231,5 +236,16 @@ const fetchResponseStreaming = async (queryMessage: string) => {
   justify-content: center;
   margin: 10px 0;
   color: #888;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+textarea::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+textarea {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 </style>
