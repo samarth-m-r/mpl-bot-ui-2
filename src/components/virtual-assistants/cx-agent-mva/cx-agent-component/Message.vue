@@ -7,7 +7,7 @@
         class="w-5 h-5 mt-1"
       />
       <div class="bg-gray-100 p-3 rounded-lg w-fit max-w-[90%] shadow-sm">
-        <div class="font-bold text-gray-800 mb-1">MPL Bot</div>
+        <div class="font-bold text-gray-800 mb-1">MPL Virtual Assistant</div>
         <div class="message-content whitespace-pre-wrap text-gray-700 leading-relaxed" v-html="parseMarkdown(content)"></div>
       </div>
     </template>
