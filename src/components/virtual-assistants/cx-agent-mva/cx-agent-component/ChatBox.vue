@@ -5,10 +5,9 @@
       v-model="message"
       ref="textarea"
       rows="1"
-      :placeholder="isListening ? 'Listening...' : 'Type your message here...'"
+      :placeholder="isListening ? 'Listening...' : isResponding ? 'Please wait...' : 'Type your message here...'"
       class="w-full rounded-lg border border-gray-300 px-4 py-2 pr-24 focus:border-[#2196f3] focus:outline-none resize-none no-scrollbar"
-      @keydown.enter.exact.prevent="fetchResponse"
-      @keydown.shift.enter.prevent="handleNewLine"
+      @keydown="handleKeyDown"
       @input="autoGrow"
     ></textarea>
     <!-- voice icon -->
@@ -225,6 +224,18 @@ const fetchResponseStreaming = async (queryMessage: string) => {
 function handleNewLine() {
   message.value += '\n';
   nextTick(() => autoGrow());
+}
+
+// Add new function to handle keydown events
+function handleKeyDown(e: KeyboardEvent) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    if (!isResponding.value && message.value.trim()) {
+      fetchResponse();
+    }
+  } else if (e.key === 'Enter' && e.shiftKey) {
+    handleNewLine();
+  }
 }
 </script>
 
