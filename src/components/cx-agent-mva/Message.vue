@@ -1,9 +1,8 @@
-
 <template>
   <div class="flex gap-2 my-1 p-2" :class="{ 'justify-end': isUser }">
     <template v-if="!isUser">
       <img
-        src="/assets/Maersk_Oil_logo.svg_-350x316.png"
+        src="@/assets/Maersk_Oil_logo.svg_-350x316.png"
         alt="MPL Bot Logo"
         class="w-5 h-5 mt-1"
       />
