@@ -5,10 +5,9 @@
       v-model="message"
       ref="textarea"
       rows="1"
-      :placeholder="isListening ? 'Listening...' : 'Type your message here...'"
+      :placeholder="isListening ? 'Listening...' : isResponding ? 'Please wait...' : 'Type your message here...'"
       class="w-full rounded-lg border border-gray-300 px-4 py-2 pr-24 focus:border-[#2196f3] focus:outline-none resize-none no-scrollbar"
-      @keydown.enter.exact.prevent="fetchResponse"
-      @keydown.shift.enter.prevent="message += '\n'"
+      @keydown="handleKeyDown"
       @input="autoGrow"
     ></textarea>
     <!-- voice icon -->
@@ -31,7 +30,13 @@
       <!-- send icon -->
       <button
         @click="fetchResponse"
-        class="p-2 hover:bg-gray-100 rounded-full transition-colors text-[#2196f3]"
+        :disabled="isResponding"
+        class="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        :class="{
+          'text-[#2196f3]': !isResponding && message.trim(),
+          'text-gray-400': isResponding || !message.trim(),
+          'cursor-not-allowed': isResponding
+        }"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 rotate-90" viewBox="0 0 20 20" fill="currentColor">
           <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
@@ -91,6 +96,7 @@ function toggleVoiceInput() {
 }
 
 const isTyping = ref(false);   // Typing indicator
+const isResponding = ref(false); // Responding indicator
 
 const isMac = computed(() => /Mac/.test(navigator.userAgent)).value;
 const isWindows = computed(() => /Win/.test(navigator.userAgent)).value;
@@ -128,6 +134,7 @@ function fetchResponse() {
 }
 
 function fetchResponseBlocking(queryMessage: string) {
+  isResponding.value = true;
   CHATS.value.push({ role: "bot", content: "Loading..." });
 
   getMplBotResponse(queryMessage, "blocking", conversationId.value, parentMessageId.value).then((res) => {
@@ -140,10 +147,13 @@ function fetchResponseBlocking(queryMessage: string) {
     }
     conversationId.value = res.conversation_id; 
     parentMessageId.value = res.message_id; 
+  }).finally(() => {
+    isResponding.value = false;
   });
 }
 
 const fetchResponseStreaming = async (queryMessage: string) => {
+  isResponding.value = true;
   CHATS.value.push({ role: "bot", content: "Loading..." });
 
   try {
@@ -175,6 +185,7 @@ const fetchResponseStreaming = async (queryMessage: string) => {
       const { done, value } = await reader.read();
       if (done) {
         isTyping.value = false;
+        isResponding.value = false;
         return;
       }
 
@@ -209,8 +220,26 @@ const fetchResponseStreaming = async (queryMessage: string) => {
     readStream();
   } catch (error) {
     console.error("Error:", error);
+    isResponding.value = false;
   }
 };
+
+function handleNewLine() {
+  message.value += '\n';
+  nextTick(() => autoGrow());
+}
+
+// Add new function to handle keydown events
+function handleKeyDown(e: KeyboardEvent) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    if (!isResponding.value && message.value.trim()) {
+      fetchResponse();
+    }
+  } else if (e.key === 'Enter' && e.shiftKey) {
+    handleNewLine();
+  }
+}
 </script>
 
 <style scoped>
@@ -234,5 +263,16 @@ const fetchResponseStreaming = async (queryMessage: string) => {
   justify-content: center;
   margin: 10px 0;
   color: #888;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+textarea::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+textarea {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 </style>

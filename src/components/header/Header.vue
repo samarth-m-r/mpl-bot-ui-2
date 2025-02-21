@@ -23,7 +23,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-const userName = ref("Samarth M R");
+const userName = ref("MPL Team");
 </script>
 
 <style scoped>
