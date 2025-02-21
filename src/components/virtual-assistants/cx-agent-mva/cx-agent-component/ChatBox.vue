@@ -156,9 +156,12 @@ const fetchResponseStreaming = async (queryMessage: string) => {
       parent_message_id: parentMessageId.value,
     };
     
-    const response = await fetch(AppConfig.MPL_BOT_API_REQUEST_URL + "/ask_bot", {
+    const response = await fetch("/api/mva/", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "authorization": "Basic bWRwOm1kcA==" // fixme: keep this in vault
+      },
       body: JSON.stringify(requestData),
     });
 

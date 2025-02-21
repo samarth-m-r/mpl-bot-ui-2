@@ -27,6 +27,7 @@ const apiClient = axios.create({
     baseURL: AppConfig.MPL_BOT_API_REQUEST_URL,
     headers: {
         "Content-Type": "application/json",
+        "authorization": "Basic bWRwOm1kcA==" // fixme: keep this in vault
     },
 });
 
@@ -47,7 +48,7 @@ export const getMplBotResponse = async (
     };
 
     try {
-        const res = await apiClient.post<IMPLBotApiResponse>("/ask_bot", requestData);
+        const res = await apiClient.post<IMPLBotApiResponse>("/mva/", requestData);
         return res.data;
     } catch (error) {
         console.error("API Error:", error);
